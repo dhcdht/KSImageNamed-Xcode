@@ -52,5 +52,15 @@
 		<key>comment</key>
 		<string>SpriteKit&apos;s SKTexture</string>
 	</dict>
+	<dict>
+		<key>classAndMethod</key>
+		<string>ImageWithName(</string>
+		<key>methodDeclaration</key>
+		<string>(</string>
+		<key>methodName</key>
+		<string>textureWithImageNamed</string>
+		<key>comment</key>
+		<string>SpriteKit&apos;s SKTexture</string>
+	</dict>
 </array>
 </plist>
