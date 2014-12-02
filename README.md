@@ -1,6 +1,11 @@
 # KSImageNamed-Xcode
 ---
 
+## Modify by this repo
+1. Merge Xcode results with the plugin results([code from this pull request](https://github.com/ksuther/KSImageNamed-Xcode/pull/6))
+2. Add image name completion support for *ImageWithName()
+
+
 ## What is this?
 
 Can't remember whether that image you just added to the project was called `button-separator-left` or `button-left-separator`? Now you don't have to, because this will autocomplete your `imageNamed:` calls like you'd expect. Just type in `[NSImage imageNamed:` or `[UIImage imageNamed:` and all the images in your project will conveniently appear in the autocomplete menu. You'll even get a handy preview of the image you're about to select.
