@@ -38,13 +38,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [self setFileURL:nil];
-    
-    [super dealloc];
-}
-
 - (void)_fillInTheRest
 {
     
@@ -57,7 +50,7 @@
 
 - (NSURL *)imageFileURL
 {
-    NSURL *imageFileURL = nil;
+    NSURL *imageFileURL;
     
     if ([self isInAssetCatalog]) {
         //Pull the first image out of the imageset's Contents.json
@@ -153,7 +146,11 @@
 
 - (NSString *)_imageNamedText
 {
-    return [NSString stringWithFormat:@"@\"%@\"", [self _fileName]];
+    if ([self forSwift]) {
+        return [NSString stringWithFormat:@"\"%@\"", [self _fileName]];
+    } else {
+        return [NSString stringWithFormat:@"@\"%@\"", [self _fileName]];
+    }
 }
 
 @end

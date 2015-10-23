@@ -33,7 +33,7 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
 
 + (instancetype)sharedPlugin
 {
-    static id sharedPlugin = nil;
+    static id sharedPlugin;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		sharedPlugin = [[self alloc] init];
@@ -61,12 +61,6 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [self setImageCompletions:nil];
-    [self setIndexesToUpdate:nil];
-    [self setImageWindow:nil];
-    
-    [super dealloc];
 }
 
 - (KSImageNamedPreviewWindow *)imageWindow
@@ -95,12 +89,18 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
     }
 }
 
-- (NSArray *)imageCompletionsForIndex:(id)index
+- (NSArray *)imageCompletionsForIndex:(id)index language:(id)language
 {
     NSArray *completions = [[self imageCompletions] objectForKey:[index workspaceName]];
     
     if (!completions) {
         completions = [self _rebuildCompletionsForIndex:index];
+    }
+
+    BOOL forSwift = [[language identifier] isEqualToString:@"Xcode.SourceCodeLanguage.Swift"];
+
+    for (KSImageNamedIndexCompletionItem *nextCompletionItem in completions) {
+        [nextCompletionItem setForSwift:forSwift];
     }
     
     return completions;
@@ -129,7 +129,7 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
         }
     });
     
-    NSSet *completionStrings = nil;
+    NSSet *completionStrings;
     
     if (type == KSImageNamedCompletionStringTypeClassAndMethod) {
         completionStrings = classAndMethodCompletionStrings;
@@ -158,7 +158,7 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
 - (NSArray *)_rebuildCompletionsForIndex:(id)index
 {
     NSString *workspaceName = [index workspaceName];
-    NSArray *completions = nil;
+    NSArray *completions;
     
     if (workspaceName) {
         if ([[self imageCompletions] objectForKey:workspaceName]) {
@@ -223,7 +223,6 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
                 encounteredAssetCatalog = YES;
             } else {
                 //Is this a 2x image? Maybe we already added a 1x version that we can mark as having a 2x version
-                //Is this a 2x image? Maybe we already added a 1x version that we can mark as having a 2x version
                 NSString *imageName = [fileName stringByDeletingPathExtension];
                 NSString *normalFileName;
                 BOOL skip = NO;
@@ -284,9 +283,12 @@ NSString * const KSShowExtensionInImageCompletionDefaultKey = @"KSShowExtensionI
         
         if ([nextURL getResourceValue:&fileName forKey:NSURLNameKey error:NULL] && [nextURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] && [isDirectory boolValue]) {
             if ([[fileName pathExtension] caseInsensitiveCompare:@"imageset"] == NSOrderedSame) {
-                KSImageNamedIndexCompletionItem *imageCompletion = [[[KSImageNamedIndexCompletionItem alloc] initWithAssetFileURL:nextURL] autorelease];
-                
-                [imageCompletions addObject:imageCompletion];
+                KSImageNamedIndexCompletionItem *imageCompletion = [[KSImageNamedIndexCompletionItem alloc] initWithAssetFileURL:nextURL];
+
+                if ([imageCompletion imageFileURL]) {
+                    // Only add the completion if there's an image in the set
+                    [imageCompletions addObject:imageCompletion];
+                }
                 
                 [enumerator skipDescendants];
             }
